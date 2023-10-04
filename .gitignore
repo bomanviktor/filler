@@ -16,3 +16,4 @@ Cargo.lock
 # Other files we don't want
 .idea
 .DS_store
+.vscode
