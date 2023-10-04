@@ -1,7 +1,4 @@
-mod algo {
-    println!("Algo tests here");
-}
+#[allow(dead_code)]
+mod algo {}
 
-mod parse {
-    println!("Parsing tests here");
-}
+mod parse {}
