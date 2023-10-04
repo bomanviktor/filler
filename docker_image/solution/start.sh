@@ -1,0 +1,1 @@
+../game_engine -f ../maps/map01 -p1 ../robots/bender -p2 debug/filler

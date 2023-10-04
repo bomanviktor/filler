@@ -28,6 +28,14 @@ pub mod render {
     mod score;
 }
 pub mod game {
+    mod state;
+
+    pub mod board;
+
     mod algorithm;
-    mod parse;
+    pub mod parse;
+
+    pub use parse::*;
+    pub mod player;
+    pub use player::*;
 }
