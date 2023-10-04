@@ -25,7 +25,7 @@ pub mod input {
 
 pub mod render {
     mod board;
-    mod score;
+    pub mod score;
 }
 pub mod game {
     mod algorithm;
