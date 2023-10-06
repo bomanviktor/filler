@@ -55,7 +55,7 @@ impl State {
 
     pub fn place_piece(&self) {
         let piece = &self.instructions.piece;
-        // let board = &self.instructions.board.anfield;
+        let board = &self.instructions.board;
         let (_width, _height) = self.instructions.board.dimensions;
 
         // let mut opponent_placed_coords: Coordinates = Coordinates::default();
@@ -68,7 +68,7 @@ impl State {
         //     }
         // }
 
-        let self_placed_coords: Coordinates = self.instructions.board.get_self_coords();
+        let self_placed_coords: Coordinates = board.get_self_coords();
         let mut bottom_piece_coords: Coordinates = Coordinates::default();
 
         for (y, row) in piece.shape.iter().enumerate() {
