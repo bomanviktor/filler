@@ -54,7 +54,7 @@ impl Board {
         Coordinates::default()
     }
 
-    pub fn get_coordinates(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
+    pub fn all_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         let mut p1_coords = Vec::new();
         let mut p2_coords = Vec::new();
 
@@ -71,21 +71,60 @@ impl Board {
         (p1_coords, p2_coords)
     }
 
-    /*
-    pub fn get_top_coordinate(&self) -> usize {
-        //!TODO
+    fn width(&self) -> isize {
+        self.dimensions.0 as isize - 1
     }
 
-    pub fn get_bottom_coordinate(&self) -> usize {
-        //!TODO
+    pub fn top_coords(&self) -> (isize, isize) {
+        let (p1_coords, p2_coords) = self.get_coordinates();
+        (p1_coords[0].y, p2_coords[0].y)
     }
 
-    pub fn get_left_coordinate(&self) -> usize {
-        //!TODO
+    pub fn bottom_coords(&self) -> (isize, isize) {
+        let (p1_coords, p2_coords) = self.get_coordinates();
+        (
+            p1_coords.iter().next_back().unwrap().y,
+            p2_coords.iter().next_back().unwrap().y,
+        )
     }
 
-    pub fn get_right_coordinate(&self) -> usize {
-        //!TODO
+    pub fn left_coords(&self) -> (isize, isize) {
+        let (p1_coords, p2_coords) = self.get_coordinates();
+
+        let mut p1_left = self.width();
+        for coordinates in p1_coords {
+            if coordinates.x < p1_left {
+                p1_left = coordinates.x;
+            }
+        }
+
+        let mut p2_left = self.width();
+        for coordinates in p2_coords {
+            if coordinates.x < p2_left {
+                p2_left = coordinates.x;
+            }
+        }
+
+        (p1_left, p2_left)
     }
-    */
+
+    pub fn right_coords(&self) -> (isize, isize) {
+        let (p1_coords, p2_coords) = self.get_coordinates();
+
+        let mut p1_right = 0;
+        for coordinates in p1_coords {
+            if coordinates.x > p1_right {
+                p1_right = coordinates.x;
+            }
+        }
+
+        let mut p2_right = 0;
+        for coordinates in p2_coords {
+            if coordinates.x > p2_right {
+                p2_right = coordinates.x;
+            }
+        }
+
+        (p1_right, p2_right)
+    }
 }
