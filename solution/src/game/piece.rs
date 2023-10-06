@@ -1,4 +1,4 @@
-use crate::game::Dimensions;
+use crate::game::{Coordinates, Dimensions};
 
 #[derive(Debug, Clone, Default)]
 pub struct Piece {
@@ -20,6 +20,22 @@ impl Piece {
 
     pub fn shape(&mut self, s: &str) {
         self.shape.push(s.trim_end().to_owned())
+    }
+
+    pub fn borders(&self) -> Vec<Coordinates> {
+        let mut borders = Vec::new();
+        for (y, row) in self.shape.iter().enumerate() {
+            if !row.contains('O') {
+                continue;
+            }
+            if row.find('O').unwrap() == row.rfind('O').unwrap() {
+                borders.push(Coordinates::new(row.find('O').unwrap(), y));
+            } else {
+                borders.push(Coordinates::new(row.find('O').unwrap(), y));
+                borders.push(Coordinates::new(row.rfind('O').unwrap(), y));
+            }
+        }
+        borders
     }
 
     pub fn dimensions(&mut self) {
