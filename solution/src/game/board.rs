@@ -53,4 +53,39 @@ impl Board {
         }
         Coordinates::default()
     }
+
+    pub fn get_coordinates(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
+        let mut p1_coords = Vec::new();
+        let mut p2_coords = Vec::new();
+
+        for (y, row) in self.anfield.iter().enumerate() {
+            for (x, c) in row.chars().enumerate() {
+                if c.eq(&'@') || c.eq(&'a') {
+                    p1_coords.push(Coordinates::new(x, y));
+                }
+                if c.eq(&'$') || c.eq(&'s') {
+                    p2_coords.push(Coordinates::new(x, y));
+                }
+            }
+        }
+        (p1_coords, p2_coords)
+    }
+
+    /*
+    pub fn get_top_coordinate(&self) -> usize {
+        //!TODO
+    }
+
+    pub fn get_bottom_coordinate(&self) -> usize {
+        //!TODO
+    }
+
+    pub fn get_left_coordinate(&self) -> usize {
+        //!TODO
+    }
+
+    pub fn get_right_coordinate(&self) -> usize {
+        //!TODO
+    }
+    */
 }
