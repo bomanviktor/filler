@@ -39,8 +39,6 @@ impl Board {
         self.anfield.push(row)
     }
 
-
-
     pub fn all_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         let mut p1_coords = Vec::new();
         let mut p2_coords = Vec::new();
@@ -70,12 +68,12 @@ impl Board {
     }
 
     pub fn top_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
         (p1_coords[0].y, p2_coords[0].y)
     }
 
     pub fn bottom_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
         (
             p1_coords.iter().next_back().unwrap().y,
             p2_coords.iter().next_back().unwrap().y,
@@ -83,7 +81,7 @@ impl Board {
     }
 
     pub fn left_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
 
         let mut p1_left = self.width();
         for coordinates in p1_coords {
@@ -103,7 +101,7 @@ impl Board {
     }
 
     pub fn right_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
 
         let mut p1_right = 0;
         for coordinates in p1_coords {
