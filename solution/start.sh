@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [[ $(uname) == "Linux" ]]; then
-    ../linux_game_engine -f ../maps/map01 -p1 ../linux_robots/bender -p2 target/debug/filler
+    ../linux_game_engine -f ../maps/map01 -p1 target/debug/filler -p2 ../linux_robots/bender
 elif [[ $(uname) == "Darwin" ]]; then
-    ../m1_game_engine -f ../maps/map01 -p1 ../m1_robots/bender -p2 target/debug/filler
+    ../m1_game_engine -f ../maps/map01 -p1 target/debug/filler -p2 ../linux_robots/bender
 else
     echo "Unsupported operating system"
 fi
