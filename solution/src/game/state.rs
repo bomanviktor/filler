@@ -9,8 +9,8 @@ pub struct State {
 
 #[derive(Debug, Default, Clone)]
 pub struct Coordinates {
-    x: isize,
-    y: isize,
+    pub x: isize,
+    pub y: isize,
 }
 
 impl Coordinates {
@@ -57,7 +57,7 @@ impl State {
         let piece = &self.instructions.piece;
         let board = &self.instructions.board;
         let (_width, _height) = self.instructions.board.dimensions;
-
+        println!("{:?}", board.right_coords());
         // let mut opponent_placed_coords: Coordinates = Coordinates::default();
 
         // for (y, row) in board.iter().enumerate() {
