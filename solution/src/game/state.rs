@@ -35,6 +35,12 @@ impl State {
 
     pub fn update(&mut self, instructions: Instructions) {
         self.instructions = instructions;
+        self.update_score();
+        self.round += 1;
+        self.place_piece();
+    }
+
+    fn update_score(&mut self) {
         let mut p1_score = 0;
         let mut p2_score = 0;
 
@@ -50,47 +56,5 @@ impl State {
         });
 
         self.score = (p1_score, p2_score);
-        self.round += 1;
-    }
-
-    pub fn place_piece(&self) {
-        let piece = &self.instructions.piece;
-        let board = &self.instructions.board;
-        let (_width, _height) = self.instructions.board.dimensions;
-        println!("{:?}", board.right_coords());
-        // let mut opponent_placed_coords: Coordinates = Coordinates::default();
-
-        // for (y, row) in board.iter().enumerate() {
-        //     for (x, ch) in row.chars().enumerate() {
-        //         if ch.eq(&'@') || ch.eq(&'a') {
-        //             opponent_placed_coords = Coordinates::new(x, y);
-        //         }
-        //     }
-        // }
-
-        let self_placed_coords: Coordinates = board.get_self_coords();
-        let mut bottom_piece_coords: Coordinates = Coordinates::default();
-
-        for (y, row) in piece.shape.iter().enumerate() {
-            for (x, ch) in row.chars().enumerate() {
-                if ch.eq(&'O') {
-                    bottom_piece_coords = Coordinates::new(x, y);
-                }
-            }
-        }
-
-        if (self_placed_coords.y - bottom_piece_coords.y) <= 0 {
-            println!(
-                "{} {}",
-                self_placed_coords.x + bottom_piece_coords.x,
-                self_placed_coords.y
-            )
-        } else {
-            println!(
-                "{} {}",
-                self_placed_coords.x - bottom_piece_coords.x,
-                self_placed_coords.y - bottom_piece_coords.y
-            )
-        }
     }
 }

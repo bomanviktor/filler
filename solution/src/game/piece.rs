@@ -42,15 +42,35 @@ impl Piece {
         self.dimensions = (self.shape[0].len(), self.shape.len())
     }
 
-    pub fn is_wide(&self) -> bool {
-        self.dimensions.0 > self.dimensions.1
+    pub fn width(&self) -> isize {
+        let mut min = self.dimensions.0 as isize;
+        let mut max = 0;
+
+        for coords in self.borders() {
+            if coords.x > max {
+                max = coords.x;
+            }
+
+            if coords.x < min {
+                min = coords.x;
+            }
+        }
+        max - min
     }
 
-    pub fn is_tall(&self) -> bool {
-        self.dimensions.0 < self.dimensions.1
-    }
+    pub fn height(&self) -> isize {
+        let mut min = self.dimensions.1 as isize;
+        let mut max = 0;
 
-    pub fn is_square(&self) -> bool {
-        self.dimensions.0 == self.dimensions.1
+        for coords in self.borders() {
+            if coords.y > max {
+                max = coords.y;
+            }
+
+            if coords.y < min {
+                min = coords.y;
+            }
+        }
+        max - min
     }
 }

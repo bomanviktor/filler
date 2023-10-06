@@ -39,20 +39,7 @@ impl Board {
         self.anfield.push(row)
     }
 
-    fn dimensions(&mut self) {
-        self.dimensions = (self.anfield[0].len(), self.anfield.len())
-    }
 
-    pub fn get_self_coords(&self) -> Coordinates {
-        for (y, row) in self.anfield.iter().enumerate() {
-            for (x, ch) in row.chars().enumerate() {
-                if ch.eq(&'$') || ch.eq(&'s') {
-                    return Coordinates::new(x, y);
-                }
-            }
-        }
-        Coordinates::default()
-    }
 
     pub fn all_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         let mut p1_coords = Vec::new();
@@ -71,8 +58,15 @@ impl Board {
         (p1_coords, p2_coords)
     }
 
-    fn width(&self) -> isize {
-        self.dimensions.0 as isize - 1
+    pub fn dimensions(&mut self) {
+        self.dimensions = (self.anfield[0].len() - 1, self.anfield.len() - 1)
+    }
+
+    pub fn width(&self) -> isize {
+        self.dimensions.0 as isize
+    }
+    pub fn height(&self) -> isize {
+        self.dimensions.1 as isize
     }
 
     pub fn top_coords(&self) -> (isize, isize) {
