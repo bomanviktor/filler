@@ -1,10 +1,13 @@
 use super::Instructions;
+use crate::game::Player;
 
 #[derive(Debug)]
 pub struct State {
     pub instructions: Instructions,
     pub score: (u64, u64),
     pub round: u64,
+    pub p1: Player,
+    pub p2: Player,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -20,6 +23,14 @@ impl Coordinates {
             y: y as isize,
         }
     }
+
+    pub fn calc_dist(&self, other: &Coordinates) -> isize {
+        if (self.x - other.x).abs() >= (self.y - other.y).abs() {
+            (self.x - other.x).abs() - 1
+        } else {
+            (self.y - other.y).abs() - 1
+        }
+    }
 }
 
 impl State {
@@ -28,6 +39,8 @@ impl State {
             instructions: instructions.clone(),
             score: (1, 1),
             round: 0,
+            p1: Player::default(),
+            p2: Player::default(),
         };
         state.update(instructions);
         state
@@ -37,6 +50,9 @@ impl State {
         self.instructions = instructions;
         self.update_score();
         self.round += 1;
+        let (p1, p2) = Player::init(&self.instructions.board);
+        self.p1 = p1;
+        self.p2 = p2;
         self.place_piece();
     }
 

@@ -1,7 +1,7 @@
 use crate::game::{Board, Piece};
 use std::io;
 
-pub type Dimensions = (usize, usize);
+pub type Dimensions = (isize, isize);
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Instructions {

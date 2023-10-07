@@ -57,14 +57,17 @@ impl Board {
     }
 
     pub fn dimensions(&mut self) {
-        self.dimensions = (self.anfield[0].len() - 1, self.anfield.len() - 1)
+        self.dimensions = (
+            self.anfield[0].len() as isize - 1,
+            self.anfield.len() as isize - 1,
+        )
     }
 
     pub fn width(&self) -> isize {
-        self.dimensions.0 as isize
+        self.dimensions.0
     }
     pub fn height(&self) -> isize {
-        self.dimensions.1 as isize
+        self.dimensions.1
     }
 
     pub fn top_coords(&self) -> (isize, isize) {

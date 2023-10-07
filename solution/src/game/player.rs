@@ -1,5 +1,6 @@
 use crate::game::{Board, Coordinates};
 
+#[derive(Default, Debug)]
 pub struct Player {
     pub coords: Vec<Coordinates>,
     pub top: isize,

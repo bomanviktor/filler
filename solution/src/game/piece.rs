@@ -39,11 +39,14 @@ impl Piece {
     }
 
     pub fn dimensions(&mut self) {
-        self.dimensions = (self.shape[0].len(), self.shape.len())
+        self.dimensions = (
+            self.shape[0].len() as isize - 1,
+            self.shape.len() as isize - 1,
+        )
     }
 
     pub fn width(&self) -> isize {
-        let mut min = self.dimensions.0 as isize;
+        let mut min = self.dimensions.0;
         let mut max = 0;
 
         for coords in self.borders() {
@@ -59,7 +62,7 @@ impl Piece {
     }
 
     pub fn height(&self) -> isize {
-        let mut min = self.dimensions.1 as isize;
+        let mut min = self.dimensions.1;
         let mut max = 0;
 
         for coords in self.borders() {
@@ -72,5 +75,18 @@ impl Piece {
             }
         }
         max - min
+    }
+
+    pub fn offset(&self) -> (isize, isize) {
+        let (mut x, mut y) = self.dimensions;
+        for coords in self.borders() {
+            if coords.x < x {
+                x = coords.x;
+            }
+            if coords.y < y {
+                y = coords.y;
+            }
+        }
+        (x, y)
     }
 }
