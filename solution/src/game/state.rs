@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use super::Instructions;
 use crate::game::Player;
 
@@ -16,12 +17,15 @@ pub struct Coordinates {
     pub y: isize,
 }
 
+impl Display for Coordinates {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.x, self.y)
+    }
+}
+
 impl Coordinates {
-    pub fn new(x: usize, y: usize) -> Self {
-        Self {
-            x: x as isize,
-            y: y as isize,
-        }
+    pub fn new(x: isize, y: isize) -> Self {
+        Self { x, y }
     }
 
     pub fn calc_dist(&self, other: &Coordinates) -> isize {
