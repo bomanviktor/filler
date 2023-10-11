@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use super::Instructions;
 use crate::game::Player;
@@ -15,6 +16,12 @@ pub struct State {
 pub struct Coordinates {
     pub x: isize,
     pub y: isize,
+}
+
+impl PartialEq for Coordinates {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
 }
 
 impl Display for Coordinates {
@@ -57,7 +64,6 @@ impl State {
         let (p1, p2) = Player::init(&self.instructions.board);
         self.p1 = p1;
         self.p2 = p2;
-        self.place_piece();
     }
 
     fn update_score(&mut self) {

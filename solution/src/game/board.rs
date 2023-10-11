@@ -46,10 +46,10 @@ impl Board {
         for (y, row) in self.anfield.iter().enumerate() {
             for (x, c) in row.chars().enumerate() {
                 if c.eq(&'@') || c.eq(&'a') {
-                    p1_coords.push(Coordinates::new(x, y));
+                    p1_coords.push(Coordinates::new(x as isize, y as isize));
                 }
                 if c.eq(&'$') || c.eq(&'s') {
-                    p2_coords.push(Coordinates::new(x, y));
+                    p2_coords.push(Coordinates::new(x as isize, y as isize));
                 }
             }
         }

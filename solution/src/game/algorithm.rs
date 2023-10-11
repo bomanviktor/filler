@@ -20,17 +20,23 @@ const PLACEMENTS: [Placement; 4] = [
 impl State {
     pub fn place_piece(&self) {
         let board = &self.instructions.board;
-        let (_width, _height) = board.dimensions;
-        vertical_prio(&self.p1, &self.p2);
+        let (width, height) = board.dimensions;
+
         horizontal_prio(&self.p1, &self.p2);
 
         let piece = &self.instructions.piece;
-        println!(
-            "{}",
-            self.inside_board(&self.p1.coords[0], piece, Placement::Above)
-        );
-        println!("{:?}", self.shortest_dist());
-        let _borders = piece.borders();
+
+        if self.bottom_coord().y + piece.height() <= height {
+            println!("{}", piece.placement_coord(self.bottom_coord()));
+            return;
+        } else {
+            for c in &self.p1.coords {
+                if self.can_place(piece, c) {
+                    println!("{}", piece.placement_coord(c));
+                    return;
+                }
+            }
+        }
     }
 
     fn inside_board(&self, c: &Coordinates, piece: &Piece, placement: Placement) -> bool {
@@ -41,25 +47,28 @@ impl State {
             Placement::Right => c.y + piece.width() >= self.instructions.board.width(),
         }
     }
-    /*
-    fn can_place(&self, piece: &Piece) -> bool {
-        let (p1, p2) = Player::init(&self.instructions.board);
+    pub fn can_place(&self, piece: &Piece, c: &Coordinates) -> bool {
         let (offset_x, offset_y) = piece.offset();
-        for coord in p1.coords {
-            let mut can_place = false;
-            for placement in PLACEMENTS {
-                if self.inside_board(&coord, piece, placement) {
-                    can_place = true;
-                }
-            }
-            if !can_place {
-                return false;
-            }
+        let mut overlapping = 0;
+
+        for coord in piece.borders() {
+            let x = c.x + coord.x - offset_x;
+            let y = c.y + coord.y - offset_y;
+            let placement = Coordinates::new(x, y);
+            overlapping += self.p1.coords
+                .iter()
+                .chain(self.p2.coords.iter())
+                .filter(|&placed| placed.eq(&placement))
+                .count();
         }
 
-        true
+        overlapping == 1
     }
-    */
+
+
+    fn bottom_coord(&self) -> &Coordinates {
+        self.p1.coords.last().unwrap()
+    }
     fn shortest_dist(&self) -> Vec<Distance> {
         let mut distances = Vec::new();
         let p1_coords = &self.p1.coords;

@@ -25,18 +25,15 @@ impl Piece {
     pub fn borders(&self) -> Vec<Coordinates> {
         let mut borders = Vec::new();
         for (y, row) in self.shape.iter().enumerate() {
-            if !row.contains('O') {
-                continue;
-            }
-            if row.find('O').unwrap() == row.rfind('O').unwrap() {
-                borders.push(Coordinates::new(row.find('O').unwrap(), y));
-            } else {
-                borders.push(Coordinates::new(row.find('O').unwrap(), y));
-                borders.push(Coordinates::new(row.rfind('O').unwrap(), y));
+            for (x , ch) in row.chars().enumerate() {
+                if ch.eq(&'O'){
+                    borders.push(Coordinates::new(x as isize, y as isize));
+                }
             }
         }
         borders
     }
+
 
     pub fn dimensions(&mut self) {
         self.dimensions = (
@@ -77,16 +74,31 @@ impl Piece {
         max - min
     }
 
+    pub fn placement_coord(&self, c: &Coordinates) -> Coordinates {
+        let offset = &self.borders()[0];
+
+        Coordinates::new(c.x - offset.x, c.y - offset.y)
+    }
+
     pub fn offset(&self) -> (isize, isize) {
-        let (mut x, mut y) = self.dimensions;
+        let mut offset = self.borders().last().unwrap().clone();
         for coords in self.borders() {
-            if coords.x < x {
-                x = coords.x;
-            }
-            if coords.y < y {
-                y = coords.y;
+            if coords.x + coords.y < offset.x + offset.y {
+                offset = coords;
             }
         }
-        (x, y)
+        (offset.x, offset.y)
+    }
+
+    pub fn wide(&self) -> bool {
+        self.width() > self.height()
+    }
+
+    pub fn tall(&self) -> bool {
+        self.height() > self.width()
+    }
+
+    pub fn square(&self) -> bool {
+        self.height() == self.width()
     }
 }
