@@ -61,7 +61,6 @@ impl Piece {
     pub fn height(&self) -> isize {
         let mut min = self.dimensions.1;
         let mut max = 0;
-
         for coords in self.borders() {
             if coords.y > max {
                 max = coords.y;
@@ -74,10 +73,13 @@ impl Piece {
         max - min
     }
 
-    pub fn placement_coord(&self, c: &Coordinates) -> Coordinates {
-        let offset = &self.borders()[0];
-
-        Coordinates::new(c.x - offset.x, c.y - offset.y)
+    pub fn placement_coord(&self, c: &Coordinates, player: u8) -> Coordinates {
+        if player == 1 {
+            let (offset_x, offset_y) = self.offset();
+            Coordinates::new(c.x - offset_x, c.y - offset_y)
+        } else {
+            Coordinates::new(c.x - self.width(), c.y - self.height())
+        }
     }
 
     pub fn offset(&self) -> (isize, isize) {

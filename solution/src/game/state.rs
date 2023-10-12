@@ -10,6 +10,7 @@ pub struct State {
     pub round: u64,
     pub p1: Player,
     pub p2: Player,
+    pub player: u8
 }
 
 #[derive(Debug, Default, Clone)]
@@ -45,13 +46,14 @@ impl Coordinates {
 }
 
 impl State {
-    pub fn new(instructions: Instructions) -> Self {
+    pub fn new(instructions: Instructions, player: u8) -> Self {
         let mut state = Self {
             instructions: instructions.clone(),
             score: (1, 1),
             round: 0,
             p1: Player::default(),
             p2: Player::default(),
+            player
         };
         state.update(instructions);
         state

@@ -16,7 +16,7 @@ impl Instructions {
         let piece_loops;
         loop {
             let instruction = instruction();
-            if instruction.contains("exec") || instruction.contains("Anfield") {
+            if instruction.contains("Anfield") || instruction.contains("exec") {
                 continue;
             }
 

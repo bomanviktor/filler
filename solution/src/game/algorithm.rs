@@ -21,11 +21,27 @@ impl State {
     pub fn place_piece(&self) {
         let board = &self.instructions.board;
         let (width, height) = board.dimensions;
-
-        horizontal_prio(&self.p1, &self.p2);
-
         let piece = &self.instructions.piece;
+        let (piece_width, piece_height) = piece.dimensions;
+        let (offset_x, offset_y) = piece.offset();
 
+        let mut placeable_coords = Vec::new();
+        for y in (0 - piece_height)..=(height - piece_height) {
+            for x in (0 - piece_width)..=(width - piece_width) {
+                let coord = Coordinates::new(x, y);
+                if self.can_place(piece, &coord)
+                    && coord.x + offset_x >= 0
+                    && coord.x + piece_width <= width
+                    && coord.y + offset_y >= 0
+                    && coord.y + piece_height <= height {
+                        placeable_coords.push(coord);
+                }
+            }
+        }
+        // println!("{placeable_coords:?}");
+        println!("{}", self.shortest_dist(placeable_coords).1);
+
+        /*
         if self.bottom_coord().y + piece.height() <= height {
             println!("{}", piece.placement_coord(self.bottom_coord()));
             return;
@@ -37,6 +53,7 @@ impl State {
                 }
             }
         }
+        */
     }
 
     fn inside_board(&self, c: &Coordinates, piece: &Piece, placement: Placement) -> bool {
@@ -49,35 +66,60 @@ impl State {
     }
     pub fn can_place(&self, piece: &Piece, c: &Coordinates) -> bool {
         let (offset_x, offset_y) = piece.offset();
-        let mut overlapping = 0;
-
+        let mut overlapping_self = 0;
         for coord in piece.borders() {
-            let x = c.x + coord.x - offset_x;
-            let y = c.y + coord.y - offset_y;
-            let placement = Coordinates::new(x, y);
-            overlapping += self.p1.coords
-                .iter()
-                .chain(self.p2.coords.iter())
-                .filter(|&placed| placed.eq(&placement))
-                .count();
+            if self.player == 1 {
+                let x = c.x + coord.x - offset_x;
+                let y = c.y + coord.y - offset_y;
+                let placement = Coordinates::new(x, y);
+                overlapping_self += self.p1.coords
+                    .iter()
+                    .filter(|&placed| placed.eq(&placement))
+                    .count();
+                if self.p2.coords
+                    .iter()
+                    .any(|placed| placed.eq(&placement)) {
+                    return false;
+                }
+            } else {
+                let x = c.x + coord.x;
+                let y = c.y + coord.y;
+                let placement = Coordinates::new(x, y);
+                overlapping_self += self.p2.coords
+                    .iter()
+                    .filter(|&placed| placed.eq(&placement))
+                    .count();
+
+                if self.p1.coords
+                    .iter()
+                    .any(|placed| placed.eq(&placement)) {
+                    return false;
+                }
+            }
         }
-
-        overlapping == 1
+        overlapping_self == 1
     }
-
 
     fn bottom_coord(&self) -> &Coordinates {
-        self.p1.coords.last().unwrap()
+        if self.player == 1 {
+            self.p1.coords.last().unwrap()
+        } else {
+            self.p2.coords.first().unwrap()
+        }
     }
-    fn shortest_dist(&self) -> Vec<Distance> {
+    fn shortest_dist(&self, self_coords: Vec<Coordinates>) -> Distance {
         let mut distances = Vec::new();
-        let p1_coords = &self.p1.coords;
-        let p2_coords = &self.p2.coords;
 
-        for c1 in p1_coords.clone() {
+        let other_coords = if self.player == 1 {
+            &self.p2.coords
+        } else {
+            &self.p1.coords
+        };
+
+        for c1 in self_coords {
             let (mut dist, mut p1, mut p2): Distance =
                 (999999999, Coordinates::default(), Coordinates::default());
-            for c2 in p2_coords.clone() {
+            for c2 in other_coords {
                 if c1.calc_dist(&c2) < dist && c1.calc_dist(&c2) > 0 {
                     dist = c1.calc_dist(&c2);
                     p1 = c1.clone();
@@ -88,13 +130,6 @@ impl State {
         }
 
         distances.sort_by_key(|dist| dist.0);
-        distances
+        distances[0].clone()
     }
-}
-
-fn vertical_prio(p1: &Player, p2: &Player) -> bool {
-    p1.bottom < p2.top
-}
-fn horizontal_prio(p1: &Player, p2: &Player) -> bool {
-    p1.right < p2.left
 }
