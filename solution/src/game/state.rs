@@ -1,7 +1,6 @@
-use std::cmp::Ordering;
-use std::fmt::{Display, Formatter};
 use super::Instructions;
 use crate::game::Player;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub struct State {
@@ -10,7 +9,7 @@ pub struct State {
     pub round: u64,
     pub p1: Player,
     pub p2: Player,
-    pub player: u8
+    pub player: u8,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -53,7 +52,7 @@ impl State {
             round: 0,
             p1: Player::default(),
             p2: Player::default(),
-            player
+            player,
         };
         state.update(instructions);
         state

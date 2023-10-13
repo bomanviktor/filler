@@ -56,6 +56,28 @@ impl Board {
         (p1_coords, p2_coords)
     }
 
+    pub fn last_piece(&self, player: u8) -> Vec<Coordinates> {
+        let mut last_piece = Vec::new();
+        if player == 1 {
+            for (y, row) in self.anfield.iter().enumerate() {
+                for (x, ch) in row.chars().enumerate() {
+                    if ch.eq(&'s') {
+                        last_piece.push(Coordinates::new(x as isize, y as isize));
+                    }
+                }
+            }
+        } else {
+            for (y, row) in self.anfield.iter().enumerate() {
+                for (x, ch) in row.chars().enumerate() {
+                    if ch.eq(&'a') {
+                        last_piece.push(Coordinates::new(x as isize, y as isize));
+                    }
+                }
+            }
+        }
+        last_piece
+    }
+
     pub fn dimensions(&mut self) {
         self.dimensions = (
             self.anfield[0].len() as isize - 1,

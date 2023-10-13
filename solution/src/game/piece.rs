@@ -25,15 +25,14 @@ impl Piece {
     pub fn borders(&self) -> Vec<Coordinates> {
         let mut borders = Vec::new();
         for (y, row) in self.shape.iter().enumerate() {
-            for (x , ch) in row.chars().enumerate() {
-                if ch.eq(&'O'){
+            for (x, ch) in row.chars().enumerate() {
+                if ch.eq(&'O') {
                     borders.push(Coordinates::new(x as isize, y as isize));
                 }
             }
         }
         borders
     }
-
 
     pub fn dimensions(&mut self) {
         self.dimensions = (
@@ -82,6 +81,26 @@ impl Piece {
         }
     }
 
+    pub fn top(&self) -> isize {
+        let mut y = self.height();
+        for c in self.borders() {
+            if c.y < y {
+                y = c.y;
+            }
+        }
+        y
+    }
+
+    pub fn left(&self) -> isize {
+        let mut x = self.width();
+        for c in self.borders() {
+            if c.x < x {
+                x = c.x;
+            }
+        }
+        x
+    }
+
     pub fn offset(&self) -> (isize, isize) {
         let mut offset = self.borders().last().unwrap().clone();
         for coords in self.borders() {
@@ -94,13 +113,5 @@ impl Piece {
 
     pub fn wide(&self) -> bool {
         self.width() > self.height()
-    }
-
-    pub fn tall(&self) -> bool {
-        self.height() > self.width()
-    }
-
-    pub fn square(&self) -> bool {
-        self.height() == self.width()
     }
 }

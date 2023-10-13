@@ -1,6 +1,6 @@
 #!/bin/bash
 
-../m1_game_engine -f ../maps/map01 -p2 target/debug/filler -p1 ../m1_robots/bender
+../m1_game_engine -f ../maps/map02 -p1 target/debug/filler -p2 ../m1_robots/terminator
 
 
 #if [[ $(uname) == "Linux" ]]; then
