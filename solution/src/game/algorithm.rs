@@ -3,8 +3,7 @@ use crate::game::{Coordinates, Piece, State};
 type Distance = (isize, Coordinates, Coordinates);
 
 impl State {
-    pub fn place_piece(&self) {
-        let piece = &self.instructions.piece;
+    pub fn place_piece(&mut self, piece: &Piece) {
         let coords = if self.player == 1 {
             &self.p1.coords
         } else {
@@ -14,15 +13,17 @@ impl State {
         let placeable_coords: Vec<Coordinates> = self
             .playable_coords(coords, piece)
             .into_iter()
-            .filter(|c| self.placeable_coords(c, piece) && self.inside_board(c, piece))
+            .filter(|c| {
+                self.board.empty_neighbor(c)
+                    && self.inside_board(c, piece)
+                    && self.placeable(c, piece)
+                })
             .collect::<Vec<Coordinates>>();
 
         if !placeable_coords.is_empty() {
-            if self.instructions.board.last_piece(self.player).is_empty() {
-                println!("{}", placeable_coords[0]);
-            } else {
-                println!("{}", self.shortest_dist(placeable_coords));
-            }
+            let placed_coords = self.shortest_dist(placeable_coords, piece);
+            self.insert(&placed_coords, piece);
+            println!("{}", placed_coords);
         } else {
             println!("0 0");
         }
@@ -31,7 +32,9 @@ impl State {
     fn playable_coords(&self, coords: &Vec<Coordinates>, piece: &Piece) -> Vec<Coordinates> {
         let mut playable_coords = Vec::new();
         let (left, right, top, bottom) = self.iterable_coords(coords);
-        let (piece_width, piece_height) = piece.dimensions;
+        let (mut piece_width, mut piece_height) = piece.dimensions;
+        piece_width -= piece.left();
+        piece_height -= piece.top();
         for y in (top - piece_height)..=bottom {
             for x in (left - piece_width)..=right {
                 playable_coords.push(Coordinates::new(x, y));
@@ -42,13 +45,13 @@ impl State {
 
     fn inside_board(&self, coord: &Coordinates, piece: &Piece) -> bool {
         let (offset_x, offset_y) = piece.offset();
-        let (width, height) = self.instructions.board.dimensions;
+        let (width, height) = self.board.dimensions;
         coord.x + piece.left() >= 0
-            && coord.x + piece.width() + offset_x <= width
+            && coord.x + piece.width() + offset_x < width
             && coord.y + piece.top() >= 0
-            && coord.y + piece.height() + offset_y <= height
+            && coord.y + piece.height() + offset_y < height
     }
-    pub fn placeable_coords(&self, c: &Coordinates, piece: &Piece) -> bool {
+    pub fn placeable(&self, c: &Coordinates, piece: &Piece) -> bool {
         let mut overlapping_self = 0;
         for coord in piece.borders() {
             let x = c.x + coord.x;
@@ -57,6 +60,7 @@ impl State {
                 continue;
             }
             let placement = Coordinates::new(x, y);
+
             if self.player == 1 {
                 overlapping_self += self
                     .p1
@@ -79,11 +83,14 @@ impl State {
                     return false;
                 }
             }
+            if overlapping_self > 1 {
+                return false;
+            }
         }
         overlapping_self == 1
     }
 
-    fn iterable_coords(&self, coords: &Vec<Coordinates>) -> (isize, isize, isize, isize) {
+    fn iterable_coords(&self, coords: &[Coordinates]) -> (isize, isize, isize, isize) {
         (
             self.left_coord(coords),
             self.right_coord(coords),
@@ -91,8 +98,8 @@ impl State {
             self.bottom_coord(coords),
         )
     }
-    fn top_coord(&self, coords: &Vec<Coordinates>) -> isize {
-        let mut y = self.instructions.board.dimensions.1;
+    fn top_coord(&self, coords: &[Coordinates]) -> isize {
+        let mut y = self.board.dimensions.1;
         for c in coords {
             if c.y < y {
                 y = c.y;
@@ -100,7 +107,7 @@ impl State {
         }
         y
     }
-    fn bottom_coord(&self, coords: &Vec<Coordinates>) -> isize {
+    fn bottom_coord(&self, coords: &[Coordinates]) -> isize {
         let mut y = 0;
         for c in coords {
             if c.y > y {
@@ -109,8 +116,8 @@ impl State {
         }
         y
     }
-    fn left_coord(&self, coords: &Vec<Coordinates>) -> isize {
-        let mut x = self.instructions.board.dimensions.0;
+    fn left_coord(&self, coords: &[Coordinates]) -> isize {
+        let mut x = self.board.dimensions.0;
         for c in coords {
             if c.x < x {
                 x = c.x;
@@ -118,7 +125,7 @@ impl State {
         }
         x
     }
-    fn right_coord(&self, coords: &Vec<Coordinates>) -> isize {
+    fn right_coord(&self, coords: &[Coordinates]) -> isize {
         let mut x = 0;
         for c in coords {
             if c.x > x {
@@ -127,7 +134,7 @@ impl State {
         }
         x
     }
-    fn shortest_dist(&self, self_coords: Vec<Coordinates>) -> Coordinates {
+    fn shortest_dist(&self, self_coords: Vec<Coordinates>, piece: &Piece) -> Coordinates {
         let mut distances = Vec::new();
         let other_coords = if self.player == 1 {
             &self.p2.coords
@@ -135,14 +142,20 @@ impl State {
             &self.p1.coords
         };
 
-        for c1 in self_coords {
+        for c1 in self_coords.iter().filter(|c| self.board.empty_neighbor(c)) {
+
             let (mut dist, mut p1, mut p2): Distance =
-                (999999999, Coordinates::default(), Coordinates::default());
-            for c2 in other_coords {
-                if c1.calc_dist(c2) <= dist && c1.calc_dist(c2) >= 0 {
-                    dist = c1.calc_dist(c2);
-                    p1 = c1.clone();
-                    p2 = c2.clone();
+                (99999, Coordinates::default(), Coordinates::default());
+
+            for c2 in other_coords
+                .iter()
+                .filter(|c| self.board.empty_neighbor(c)) {
+
+                let placement = piece.placement_coord(&c1);
+                if placement.calc_dist(c2) < dist {
+                        dist = placement.calc_dist(c2);
+                        p1 = c1.clone();
+                        p2 = c2.clone();
                 }
             }
             distances.push((dist, p1, p2) as Distance)

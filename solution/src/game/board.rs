@@ -1,50 +1,50 @@
-use crate::game::Dimensions;
+use crate::game::{Dimensions, dimensions, instruction};
 
 use super::Coordinates;
 
 #[derive(Default, Debug, Clone)]
 pub struct Board {
     pub dimensions: Dimensions,
-    pub anfield: Vec<String>,
+    pub anfield: Vec<Vec<char>>,
 }
 
 impl Board {
-    pub fn new(rows: Vec<String>) -> Self {
+    pub fn new() -> Self {
+        let dimensions = dimensions(&instruction());
         let mut board = Self {
-            dimensions: Dimensions::default(),
-            anfield: Vec::new(),
+            dimensions,
+            anfield: Vec::with_capacity(dimensions.1 as usize),
         };
 
-        rows.iter()
-            .filter(|&r| {
-                r.contains(" .")
-                    || r.contains(" @")
-                    || r.contains(" $")
-                    || r.contains(" a")
-                    || r.contains(" s")
-            })
-            .for_each(|r| board.anfield(r));
-
-        board.dimensions();
+        for _ in 0..=dimensions.1 as usize {
+            let instruction = &instruction();
+            if  instruction.contains(" .")
+                || instruction.contains(" @")
+                || instruction.contains(" $")
+                || instruction.contains(" a")
+                || instruction.contains(" s") {
+                board.anfield(instruction);
+            }
+        }
         board
     }
+
+
 
     pub fn anfield(&mut self, s: &str) {
         let row = s
             .split_whitespace()
             .next_back()
             .unwrap()
-            .trim_end()
-            .to_owned();
-        self.anfield.push(row)
+            .trim_end();
+        self.anfield.push(row.chars().collect())
     }
 
     pub fn all_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         let mut p1_coords = Vec::new();
         let mut p2_coords = Vec::new();
-
         for (y, row) in self.anfield.iter().enumerate() {
-            for (x, c) in row.chars().enumerate() {
+            for (x, c) in row.iter().enumerate() {
                 if c.eq(&'@') || c.eq(&'a') {
                     p1_coords.push(Coordinates::new(x as isize, y as isize));
                 }
@@ -53,14 +53,29 @@ impl Board {
                 }
             }
         }
+
         (p1_coords, p2_coords)
+    }
+
+    pub fn empty_neighbor(&self, c: &Coordinates) -> bool {
+        let x = c.x as usize;
+        let y = c.y as usize;
+        if x <= 0 || y <= 0 {
+            return true;
+        }
+        for row in self.anfield.iter().skip(y - 1).take(3) {
+            if row.iter().skip(x - 1).take(3).any(|c| c == &'.') {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn last_piece(&self, player: u8) -> Vec<Coordinates> {
         let mut last_piece = Vec::new();
         if player == 1 {
             for (y, row) in self.anfield.iter().enumerate() {
-                for (x, ch) in row.chars().enumerate() {
+                for (x, ch) in row.iter().enumerate() {
                     if ch.eq(&'s') {
                         last_piece.push(Coordinates::new(x as isize, y as isize));
                     }
@@ -68,7 +83,7 @@ impl Board {
             }
         } else {
             for (y, row) in self.anfield.iter().enumerate() {
-                for (x, ch) in row.chars().enumerate() {
+                for (x, ch) in row.iter().enumerate() {
                     if ch.eq(&'a') {
                         last_piece.push(Coordinates::new(x as isize, y as isize));
                     }
@@ -76,13 +91,6 @@ impl Board {
             }
         }
         last_piece
-    }
-
-    pub fn dimensions(&mut self) {
-        self.dimensions = (
-            self.anfield[0].len() as isize - 1,
-            self.anfield.len() as isize - 1,
-        )
     }
 
     pub fn width(&self) -> isize {
