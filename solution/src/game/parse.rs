@@ -1,49 +1,6 @@
-use crate::game::{Board, Piece};
 use std::io;
 
 pub type Dimensions = (isize, isize);
-#[allow(dead_code)]
-#[derive(Debug, Clone)]
-pub struct Instructions {
-    pub board: Board,
-    pub piece: Piece,
-}
-
-impl Instructions {
-    pub fn new() -> Self {
-        let mut board = Vec::new();
-        let mut piece = Vec::new();
-        let piece_loops;
-        loop {
-            let instruction = instruction();
-            if instruction.contains("Anfield") || instruction.contains("exec") {
-                continue;
-            }
-
-            if instruction.contains("Piece") {
-                piece_loops = instruction
-                    .trim_end()
-                    .trim_end_matches(':')
-                    .split_whitespace()
-                    .next_back()
-                    .unwrap()
-                    .parse::<usize>()
-                    .unwrap();
-                break;
-            } else {
-                board.push(instruction);
-            }
-        }
-        for _ in 0..piece_loops {
-            piece.push(instruction());
-        }
-
-        Self {
-            board: Board::new(board),
-            piece: Piece::new(piece),
-        }
-    }
-}
 
 pub fn instruction() -> String {
     let mut input = String::new();
@@ -51,8 +8,22 @@ pub fn instruction() -> String {
     input
 }
 
-impl Default for Instructions {
-    fn default() -> Self {
-        Self::new()
+pub fn dimensions(s: &str) -> (isize, isize) {
+    let dimensions: Vec<&str> = s.trim_end()
+        .trim_end_matches(":")
+        .split_ascii_whitespace()
+        .skip(1)
+        .collect();
+
+    (dimensions[0].parse().unwrap(), dimensions[1].parse().unwrap())
+}
+
+pub fn player() -> u8 {
+    match instruction()
+        .split_ascii_whitespace()
+        .collect::<Vec<&str>>()[2]
+    {
+        "p1" => 1,
+        _ => 2,
     }
 }

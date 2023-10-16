@@ -1,13 +1,11 @@
-use filler::game::{instruction, Instructions, State};
+use filler::game::{Board, Piece, Player, player, State};
 fn main() {
-    let player = match instruction()
-        .split_ascii_whitespace()
-        .collect::<Vec<&str>>()[2]
-    {
-        "p1" => 1,
-        _ => 2,
-    };
+    let player = player();
+    let board = Board::new();
+    let players = Player::init(&board);
+    let mut state = State::new(board, player, players);
     loop {
-        State::new(Instructions::new(), player).place_piece();
+        state.place_piece(&Piece::new());
+        state.read_board();
     }
 }
