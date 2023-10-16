@@ -1,42 +1,40 @@
-pub struct PlayerBuilder {
-    name: String,
-    start_location: Option<(u64, u64)>,
-    piece: Option<char>,
-}
+use crate::game::{Board, Coordinates};
 
-impl PlayerBuilder {
-    pub fn new(name: String) -> Self {
-        Self {
-            name,
-            start_location: None,
-            piece: None,
-        }
-    }
-
-    pub fn start_location(&mut self, x: u64, y: u64) -> &mut PlayerBuilder {
-        self.start_location = Some((x, y));
-        self
-    }
-
-    pub fn piece(&mut self, piece: char) -> &mut PlayerBuilder {
-        self.piece = Some(piece);
-        self
-    }
-
-    pub fn build(&self) -> Player {
-        Player {
-            name: self.name.clone(),
-            score: 0,
-            start_location: self.start_location.unwrap(),
-            piece: self.piece.unwrap(),
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct Player {
-    pub name: String,
-    pub score: u64,
-    pub start_location: (u64, u64),
-    pub piece: char,
+    pub coords: Vec<Coordinates>,
+    pub top: isize,
+    pub right: isize,
+    pub bottom: isize,
+    pub left: isize,
+}
+
+impl Player {
+    pub fn new(
+        coords: Vec<Coordinates>,
+        top: isize,
+        right: isize,
+        bottom: isize,
+        left: isize,
+    ) -> Self {
+        Self {
+            coords,
+            top,
+            right,
+            bottom,
+            left,
+        }
+    }
+
+    pub fn init(board: &Board) -> (Self, Self) {
+        let (p1_coords, p2_coords) = board.all_coords();
+        let (p1_top, p2_top) = board.top_coords();
+        let (p1_right, p2_right) = board.right_coords();
+        let (p1_bottom, p2_bottom) = board.bottom_coords();
+        let (p1_left, p2_left) = board.left_coords();
+        (
+            Player::new(p1_coords, p1_top, p1_right, p1_bottom, p1_left),
+            Player::new(p2_coords, p2_top, p2_right, p2_bottom, p2_left),
+        )
+    }
 }

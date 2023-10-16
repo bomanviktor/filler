@@ -39,21 +39,6 @@ impl Board {
         self.anfield.push(row)
     }
 
-    fn dimensions(&mut self) {
-        self.dimensions = (self.anfield[0].len(), self.anfield.len())
-    }
-
-    pub fn get_self_coords(&self) -> Coordinates {
-        for (y, row) in self.anfield.iter().enumerate() {
-            for (x, ch) in row.chars().enumerate() {
-                if ch.eq(&'$') || ch.eq(&'s') {
-                    return Coordinates::new(x, y);
-                }
-            }
-        }
-        Coordinates::default()
-    }
-
     pub fn all_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         let mut p1_coords = Vec::new();
         let mut p2_coords = Vec::new();
@@ -61,27 +46,59 @@ impl Board {
         for (y, row) in self.anfield.iter().enumerate() {
             for (x, c) in row.chars().enumerate() {
                 if c.eq(&'@') || c.eq(&'a') {
-                    p1_coords.push(Coordinates::new(x, y));
+                    p1_coords.push(Coordinates::new(x as isize, y as isize));
                 }
                 if c.eq(&'$') || c.eq(&'s') {
-                    p2_coords.push(Coordinates::new(x, y));
+                    p2_coords.push(Coordinates::new(x as isize, y as isize));
                 }
             }
         }
         (p1_coords, p2_coords)
     }
 
-    fn width(&self) -> isize {
-        self.dimensions.0 as isize - 1
+    pub fn last_piece(&self, player: u8) -> Vec<Coordinates> {
+        let mut last_piece = Vec::new();
+        if player == 1 {
+            for (y, row) in self.anfield.iter().enumerate() {
+                for (x, ch) in row.chars().enumerate() {
+                    if ch.eq(&'s') {
+                        last_piece.push(Coordinates::new(x as isize, y as isize));
+                    }
+                }
+            }
+        } else {
+            for (y, row) in self.anfield.iter().enumerate() {
+                for (x, ch) in row.chars().enumerate() {
+                    if ch.eq(&'a') {
+                        last_piece.push(Coordinates::new(x as isize, y as isize));
+                    }
+                }
+            }
+        }
+        last_piece
+    }
+
+    pub fn dimensions(&mut self) {
+        self.dimensions = (
+            self.anfield[0].len() as isize - 1,
+            self.anfield.len() as isize - 1,
+        )
+    }
+
+    pub fn width(&self) -> isize {
+        self.dimensions.0
+    }
+    pub fn height(&self) -> isize {
+        self.dimensions.1
     }
 
     pub fn top_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
         (p1_coords[0].y, p2_coords[0].y)
     }
 
     pub fn bottom_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
         (
             p1_coords.iter().next_back().unwrap().y,
             p2_coords.iter().next_back().unwrap().y,
@@ -89,7 +106,7 @@ impl Board {
     }
 
     pub fn left_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
 
         let mut p1_left = self.width();
         for coordinates in p1_coords {
@@ -109,7 +126,7 @@ impl Board {
     }
 
     pub fn right_coords(&self) -> (isize, isize) {
-        let (p1_coords, p2_coords) = self.get_coordinates();
+        let (p1_coords, p2_coords) = self.all_coords();
 
         let mut p1_right = 0;
         for coordinates in p1_coords {

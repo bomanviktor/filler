@@ -1,7 +1,7 @@
 use crate::game::{Board, Piece};
 use std::io;
 
-pub type Dimensions = (usize, usize);
+pub type Dimensions = (isize, isize);
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Instructions {
@@ -16,7 +16,7 @@ impl Instructions {
         let piece_loops;
         loop {
             let instruction = instruction();
-            if instruction.contains("exec") || instruction.contains("Anfield") {
+            if instruction.contains("Anfield") || instruction.contains("exec") {
                 continue;
             }
 
