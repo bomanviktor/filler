@@ -3,38 +3,56 @@ use crate::game::{Board, Coordinates};
 #[derive(Default, Debug)]
 pub struct Player {
     pub coords: Vec<Coordinates>,
-    pub top: isize,
-    pub right: isize,
-    pub bottom: isize,
-    pub left: isize,
+    pub playable: Vec<Coordinates>,
 }
 
 impl Player {
     pub fn new(
         coords: Vec<Coordinates>,
-        top: isize,
-        right: isize,
-        bottom: isize,
-        left: isize,
+        playable: Vec<Coordinates>,
     ) -> Self {
         Self {
             coords,
-            top,
-            right,
-            bottom,
-            left,
+            playable
         }
     }
 
     pub fn init(board: &Board) -> (Self, Self) {
-        let (p1_coords, p2_coords) = board.all_coords();
-        let (p1_top, p2_top) = board.top_coords();
-        let (p1_right, p2_right) = board.right_coords();
-        let (p1_bottom, p2_bottom) = board.bottom_coords();
-        let (p1_left, p2_left) = board.left_coords();
+        let (p1_coords,
+            p2_coords,
+            playable_1,
+            playable_2) = board.all_coords();
         (
-            Player::new(p1_coords, p1_top, p1_right, p1_bottom, p1_left),
-            Player::new(p2_coords, p2_top, p2_right, p2_bottom, p2_left),
+            Player::new(p1_coords, playable_1),
+            Player::new(p2_coords, playable_2),
         )
+    }
+
+    pub fn top_y(&self) -> isize {
+        self.coords[0].y
+    }
+
+    pub fn bottom_y(&self) -> isize {
+            self.coords.last().unwrap().y
+    }
+
+    pub fn left_x(&self) -> isize {
+        let mut left = 999;
+        for coordinates in &self.coords {
+            if coordinates.x < left {
+                left = coordinates.x;
+            }
+        }
+        left
+    }
+
+    pub fn right_x(&self) -> isize {
+        let mut right = 0;
+        for coordinates in &self.coords {
+            if coordinates.x > right {
+                right = coordinates.x;
+            }
+        }
+        right
     }
 }

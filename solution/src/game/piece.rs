@@ -1,31 +1,33 @@
-use crate::game::{Coordinates, Dimensions};
+use crate::game::{Coordinates, Dimensions, dimensions, instruction};
 
 #[derive(Debug, Clone, Default)]
 pub struct Piece {
     pub dimensions: Dimensions,
-    pub shape: Vec<String>,
+    pub shape: Vec<Vec<char>>,
 }
 
 impl Piece {
-    pub fn new(rows: Vec<String>) -> Self {
+    pub fn new() -> Self {
+        let dimensions = dimensions(&instruction());
         let mut piece = Self {
-            dimensions: Dimensions::default(),
-            shape: Vec::new(),
+            dimensions,
+            shape: Vec::with_capacity(dimensions.1 as usize),
         };
-
-        rows.iter().for_each(|r| piece.shape(r));
-        piece.dimensions();
+        for _ in 0..dimensions.1 as usize {
+            let instruction = &instruction();
+            piece.shape(instruction);
+        }
         piece
     }
 
     pub fn shape(&mut self, s: &str) {
-        self.shape.push(s.trim_end().to_owned())
+        self.shape.push(s.trim_end().chars().collect())
     }
 
     pub fn borders(&self) -> Vec<Coordinates> {
         let mut borders = Vec::new();
         for (y, row) in self.shape.iter().enumerate() {
-            for (x, ch) in row.chars().enumerate() {
+            for (x, ch) in row.iter().enumerate() {
                 if ch.eq(&'O') {
                     borders.push(Coordinates::new(x as isize, y as isize));
                 }
@@ -34,12 +36,7 @@ impl Piece {
         borders
     }
 
-    pub fn dimensions(&mut self) {
-        self.dimensions = (
-            self.shape[0].len() as isize - 1,
-            self.shape.len() as isize - 1,
-        )
-    }
+
 
     pub fn width(&self) -> isize {
         let mut min = self.dimensions.0;
@@ -72,13 +69,9 @@ impl Piece {
         max - min
     }
 
-    pub fn placement_coord(&self, c: &Coordinates, player: u8) -> Coordinates {
-        if player == 1 {
-            let (offset_x, offset_y) = self.offset();
-            Coordinates::new(c.x - offset_x, c.y - offset_y)
-        } else {
-            Coordinates::new(c.x - self.width(), c.y - self.height())
-        }
+    pub fn placement_coord(&self, c: &Coordinates) -> Coordinates {
+        let (offset_x, offset_y) = self.offset();
+        Coordinates::new(c.x - offset_x, c.y - offset_y)
     }
 
     pub fn top(&self) -> isize {
