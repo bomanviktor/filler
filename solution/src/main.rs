@@ -6,6 +6,6 @@ fn main() {
     let mut state = State::new(board, player, players);
     loop {
         state.place_piece(&Piece::new());
-        state.read_board();
+        state.update();
     }
 }
