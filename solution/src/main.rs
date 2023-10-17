@@ -5,7 +5,7 @@ fn main() {
     let players = Player::init(&board);
     let mut state = State::new(board, player, players);
     loop {
-        state.place_piece(&Piece::new());
-        state.read_board();
+        state.make_move(&Piece::new());
+        state.update();
     }
 }

@@ -10,6 +10,7 @@ pub struct State {
     pub p1: Player,
     pub p2: Player,
     pub player: u8,
+    pub endgame: bool
 }
 
 impl State {
@@ -17,14 +18,15 @@ impl State {
         Self {
             board,
             score: (1, 1),
-            round: 0,
+            round: 1,
             p1: players.0,
             p2: players.1,
             player,
+            endgame: false
         }
     }
 
-    pub fn read_board(&mut self) {
+    pub fn update(&mut self) {
         for row in self.board.anfield.iter_mut() {
             if row.contains(&'a') || row.contains(&'s'){
                 for cell in row.iter_mut() {
@@ -59,29 +61,24 @@ impl State {
                 }
             }
         }
-
+        let (p1_score, p2_score) = (self.p1.coords.len(), self.p2.coords.len());
         let (p1, p2) = Player::init(&self.board);
         self.p1 = p1;
         self.p2 = p2;
-    }
 
-    fn update_score(&mut self) {
-        let mut p1_score = 0;
-        let mut p2_score = 0;
+        let (new_p1_score, new_p2_score) = (self.p1.coords.len(), self.p2.coords.len());
 
-        self.board.anfield.iter().for_each(|row| {
-            for c in row.iter() {
-                if c.eq(&'@') || c.eq(&'a') {
-                    p1_score += 1;
-                }
-                if c.eq(&'$') || c.eq(&'s') {
-                    p2_score += 1;
-                }
+        if !self.endgame {
+            if self.player == 1 && new_p2_score == p2_score {
+                self.endgame = true;
+            } else if self.player == 2 && new_p1_score == p1_score{
+                self.endgame = true;
             }
-        });
-
-        self.score = (p1_score, p2_score);
+        }
+        self.score = (new_p1_score as u64, new_p2_score as u64);
+        self.round += 1;
     }
+
     pub fn insert(&mut self, c: &Coordinates, piece: &Piece) {
         let character = if self.player == 1 {
             'a'
