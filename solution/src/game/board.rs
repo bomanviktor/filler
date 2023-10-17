@@ -71,12 +71,21 @@ impl Board {
         let x = c.x as usize;
         let y = c.y as usize;
 
-        if x <= 0 {
-            return true;
-        }
-        for row in self.anfield.iter().skip(y - 1).take(3) {
-            if row.iter().skip(x - 1).take(3).any(|c| c == &'.') {
-                return true;
+        let rows = if y == 0 {
+            self.anfield.iter().skip(0).take(2)
+        } else {
+            self.anfield.iter().skip(y-1).take(3)
+        };
+
+        for row in rows {
+            if x == 0 {
+                if row.iter().take(2).any(|c| c == &'.') {
+                    return true;
+                }
+            } else {
+                if row.iter().skip(x-1).take(3).any(|c| c == &'.') {
+                    return true;
+                }
             }
         }
         false
