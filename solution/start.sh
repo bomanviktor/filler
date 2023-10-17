@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $(uname -m) == "aarch64" ]]; then
-  ../m1_game_engine -f ../maps/map01 -p1 target/debug/filler -p2 ../m1_robots/bender
+  ../m1_game_engine -f ../maps/map02 -p1 target/debug/filler -p2 ../m1_robots/terminator
 else
   ../linux_game_engine -f ../maps/map00 -p1 target/debug/filler -p2 ../linux_robots/bender
 fi

@@ -39,43 +39,21 @@ impl Piece {
 
 
     pub fn width(&self) -> isize {
-        let mut min = self.dimensions.0;
-        let mut max = 0;
-
-        for coords in self.borders() {
-            if coords.x > max {
-                max = coords.x;
-            }
-
-            if coords.x < min {
-                min = coords.x;
-            }
-        }
-        max - min
+        self.right() - self.left() + 1
     }
 
     pub fn height(&self) -> isize {
-        let mut min = self.dimensions.1;
-        let mut max = 0;
-        for coords in self.borders() {
-            if coords.y > max {
-                max = coords.y;
-            }
-
-            if coords.y < min {
-                min = coords.y;
-            }
-        }
-        max - min
+        self.bottom() - self.top() + 1
     }
-
+/*
     pub fn placement_coord(&self, c: &Coordinates) -> Coordinates {
         let (offset_x, offset_y) = self.offset();
         Coordinates::new(c.x - offset_x, c.y - offset_y)
     }
 
+ */
     pub fn top(&self) -> isize {
-        let mut y = self.height();
+        let mut y = self.dimensions.1;
         for c in self.borders() {
             if c.y < y {
                 y = c.y;
@@ -84,8 +62,18 @@ impl Piece {
         y
     }
 
+    pub fn bottom(&self) -> isize {
+        let mut y = 0;
+        for c in self.borders() {
+            if c.y > y {
+                y = c.y;
+            }
+        }
+        y
+    }
+
     pub fn left(&self) -> isize {
-        let mut x = self.width();
+        let mut x = self.dimensions.0;
         for c in self.borders() {
             if c.x < x {
                 x = c.x;
@@ -94,6 +82,16 @@ impl Piece {
         x
     }
 
+    pub fn right(&self) -> isize {
+        let mut x = 0;
+        for c in self.borders() {
+            if c.x > x {
+                x = c.x;
+            }
+        }
+        x
+    }
+/*
     pub fn offset(&self) -> (isize, isize) {
         let mut offset = self.borders().last().unwrap().clone();
         for coords in self.borders() {
@@ -103,7 +101,7 @@ impl Piece {
         }
         (offset.x, offset.y)
     }
-
+ */
     pub fn wide(&self) -> bool {
         self.width() > self.height()
     }
