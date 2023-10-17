@@ -1,4 +1,4 @@
-use filler::game::{Board, instruction, Piece, Player, player, State};
+use filler::game::{Board, Piece, Player, player, State};
 fn main() {
     let player = player();
     let board = Board::new();

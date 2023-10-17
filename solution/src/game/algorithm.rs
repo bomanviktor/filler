@@ -5,17 +5,16 @@ type Distance = (isize, Coordinates, Coordinates);
 impl State {
     pub fn place_piece(&mut self, piece: &Piece) {
         let coords = if self.player == 1 {
-            &self.p1.coords
+            &self.p1.playable
         } else {
-            &self.p2.coords
+            &self.p2.playable
         };
 
         let placeable_coords: Vec<Coordinates> = self
             .playable_coords(coords, piece)
             .into_iter()
             .filter(|c| {
-                self.board.empty_neighbor(c)
-                    && self.inside_board(c, piece)
+                    self.inside_board(c, piece)
                     && self.placeable(c, piece)
                 })
             .collect::<Vec<Coordinates>>();
@@ -30,16 +29,18 @@ impl State {
     }
 
     fn playable_coords(&self, coords: &Vec<Coordinates>, piece: &Piece) -> Vec<Coordinates> {
-        let mut playable_coords = Vec::new();
-        let (left, right, top, bottom) = self.iterable_coords(coords);
         let (mut piece_width, mut piece_height) = piece.dimensions;
-        piece_width -= piece.left();
-        piece_height -= piece.top();
-        for y in (top - piece_height)..=bottom {
-            for x in (left - piece_width)..=right {
-                playable_coords.push(Coordinates::new(x, y));
+        let capacity = piece_width * 2 * piece_height * 2;
+        let mut playable_coords = Vec::with_capacity(capacity as usize);
+        coords.iter().for_each(|c| {
+            for y in -piece_height..=piece_height {
+                for x in -piece_width..=piece_width {
+                    playable_coords.push(Coordinates::new(c.x + x, c.y + y));
+                }
             }
-        }
+        });
+
+
         playable_coords
     }
 
@@ -53,6 +54,12 @@ impl State {
     }
     pub fn placeable(&self, c: &Coordinates, piece: &Piece) -> bool {
         let mut overlapping_self = 0;
+        let (self_coords, other_coords) = if self.player == 1 {
+            (&self.p1.coords, &self.p2.coords)
+        } else {
+            (&self.p2.coords, &self.p1.coords)
+        };
+
         for coord in piece.borders() {
             let x = c.x + coord.x;
             let y = c.y + coord.y;
@@ -60,29 +67,14 @@ impl State {
                 continue;
             }
             let placement = Coordinates::new(x, y);
-
-            if self.player == 1 {
-                overlapping_self += self
-                    .p1
-                    .coords
-                    .iter()
-                    .filter(|&placed| placed.eq(&placement))
-                    .count();
-                if self.p2.coords.iter().any(|placed| placed.eq(&placement)) {
-                    return false;
-                }
-            } else {
-                overlapping_self += self
-                    .p2
-                    .coords
-                    .iter()
-                    .filter(|&placed| placed.eq(&placement))
-                    .count();
-
-                if self.p1.coords.iter().any(|placed| placed.eq(&placement)) {
-                    return false;
-                }
+            overlapping_self += self_coords
+                .iter()
+                .filter(|&placed| placed.eq(&placement))
+                .count();
+            if other_coords.iter().any(|placed| placed.eq(&placement)) {
+                return false;
             }
+
             if overlapping_self > 1 {
                 return false;
             }
