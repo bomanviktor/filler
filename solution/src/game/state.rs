@@ -92,6 +92,38 @@ impl State {
             self.board.anfield[y][x] = character;
         }
     }
+
+    pub fn top(&self) -> (isize, isize) {
+        if self.player == 1 {
+            (self.p1.top_y(), self.p2.top_y())
+        } else {
+            (self.p2.top_y(), self.p1.top_y())
+        }
+    }
+
+    pub fn bottom(&self) -> (isize, isize) {
+        if self.player == 1 {
+            (self.p1.bottom_y(), self.p2.bottom_y())
+        } else {
+            (self.p2.bottom_y(), self.p1.bottom_y())
+        }
+    }
+
+    pub fn left(&self) -> (isize, isize) {
+        if self.player == 1 {
+            (self.p1.left_x(), self.p2.left_x())
+        } else {
+            (self.p2.left_x(), self.p1.left_x())
+        }
+    }
+
+    pub fn right(&self) -> (isize, isize) {
+        if self.player == 1 {
+            (self.p1.right_x(), self.p2.right_x())
+        } else {
+            (self.p2.right_x(), self.p1.right_x())
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone)]
@@ -117,13 +149,12 @@ impl Coordinates {
         Self { x, y }
     }
 
-    pub fn calc_dist(&self, other: &Coordinates) -> isize {
-        if (self.x - other.x).abs() >= (self.y - other.y).abs() {
-            (self.x - other.x).abs() - 1
-        } else {
-            (self.y - other.y).abs() - 1
-        }
+    pub fn calc_dist(&self, other: &Coordinates) -> f64 {
+        let x_diff = (self.x - other.x).abs() as f64;
+        let y_diff = (self.y - other.y).abs() as f64;
+        (x_diff.powi(2) + y_diff.powi(2)).sqrt()
     }
+
 }
 
 

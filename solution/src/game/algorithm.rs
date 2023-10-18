@@ -1,7 +1,7 @@
-use std::ops::ControlFlow::Continue;
 use crate::game::{Coordinates, Piece, State};
 
-type Distance = (isize, Coordinates);
+type Distance = (f64, Coordinates);
+
 
 impl State {
     pub fn place_piece(&mut self, piece: &Piece) {
@@ -17,10 +17,22 @@ impl State {
         }
 
 
-        let sorted_coords = self.sorted_distances();
+        if let Some(block_coords) = self.block(piece) {
+            let sorted_coords = self.sorted_distances(&block_coords);
+            for c in &sorted_coords {
+                if let Some(placement_coords) = self.can_place(c, piece) {
+                    let placement = self.shortest_distance(&placement_coords);
+                    self.insert(&placement, piece);
+                    println!("{}", placement);
+                    return;
+                }
+            }
+
+        }
+
+        let sorted_coords = self.sorted_distances(&self.get_playable_coords().0);
         for c in &sorted_coords {
             if let Some(placement_coords) = self.can_place(c, piece) {
-
                 let placement = self.shortest_distance(&placement_coords);
                 self.insert(&placement, piece);
                 println!("{}", placement);
@@ -30,11 +42,80 @@ impl State {
         println!("0 0");
     }
 
-    fn sorted_distances(&self) -> Vec<Coordinates> {
-        let (self_coords, other_coords) = self.get_playable_coords();
+    fn block(&self, p: &Piece) -> Option<Vec<Coordinates>> {
+        let (self_left, other_left) = self.left();
+        let (self_right, other_right) = self.right();
+        let (self_top, other_top) = self.top();
+        let (self_bot, other_bot) = self.bottom();
+
+        if !p.wide() {
+            return None;
+        }
+
+        let width = self.board.width();
+        let margin = width / 5;
+
+        if (0..margin).contains(&(self_left - p.width())){
+            return Some(
+                self.get_playable_coords().0
+                    .into_iter()
+                    .filter(|c| c.x == self_left)
+                    .collect()
+            )
+        }
+
+        if (width - margin - 1..width).contains(&(self_right + p.width())) {
+            return Some(
+                self.get_playable_coords().0
+                    .into_iter()
+                    .filter(|c| c.x == self_right)
+                    .collect()
+            )
+        }
+
+            None
+            /*
+            let top_diff = if self_top <= other_top {
+                (self_top - other_top).abs()
+            } else {
+                0
+            };
+
+            let bot_diff = if self_bot >= other_bot {
+                (self_bot - other_bot).abs()
+            } else {
+                0
+            };
+
+            if top_diff + bot_diff == 0 {
+                return None;
+            }
+
+            if top_diff > bot_diff {
+                Some(
+                    self.get_playable_coords().0
+                        .into_iter()
+                        .filter(|c| c.y < self_top + p.height())
+                        .collect()
+                )
+            } else {
+                Some(
+                    self.get_playable_coords().0
+                        .into_iter()
+                        .filter(|c| c.y > self_bot - p.height())
+                        .collect()
+                )
+            }
+
+             */
+
+    }
+
+    fn sorted_distances(&self, self_coords: &[Coordinates]) -> Vec<Coordinates> {
+        let other_coords= self.get_playable_coords().1;
         let mut distances: Vec<Distance> = Vec::new();
         for c1 in self_coords.into_iter() {
-            let mut dist = isize::MAX;
+            let mut dist = f64::MAX;
             for c2 in &other_coords {
                 let current_distance = c1.calc_dist(&c2);
                 if current_distance < dist {
@@ -52,7 +133,7 @@ impl State {
     }
 
     fn can_place(&self, c: &Coordinates, p: &Piece) -> Option<Vec<Coordinates>> {
-        let (self_coords, other_coords) = self.get_player_coords();
+        let in_range_coords = self.in_range_coords(c, p);
 
         let mut placeable = Vec::new();
         let borders = p.borders();
@@ -65,11 +146,9 @@ impl State {
 
                 let piece_coordinate = Coordinates::new(x, y);
                 if self.out_of_bounds(&piece_coordinate)
-                    || other_coords.contains(&piece_coordinate)
-                    || self_coords.contains(&piece_coordinate)
-                    {
-                    allowed_to_place = false;
-                    break
+                    || in_range_coords.contains(&piece_coordinate) {
+                        allowed_to_place = false;
+                        break
                 }
             }
             if allowed_to_place {
@@ -91,14 +170,14 @@ impl State {
             &self.p1.playable
         };
 
-        let mut shortest_distance = 999;
+        let mut shortest_distance = f64::MAX;
         let mut closest_coord = Coordinates::default();
 
         for coord in other_coords {
             for piece_coord in coords {
                 let distance = coord.calc_dist(piece_coord);
 
-                if distance <= shortest_distance {
+                if distance < shortest_distance {
                     shortest_distance = distance;
                     closest_coord = piece_coord.clone();
                 }
@@ -115,34 +194,6 @@ impl State {
             || coord.y < 0
             || coord.y >= height
     }
-    pub fn placeable(&self, c: &Coordinates, piece: &Piece) -> bool {
-        let mut overlapping_self = 0;
-        let (self_coords, other_coords) = self.get_player_coords();
-
-        for coord in piece.borders() {
-            let x = c.x + coord.x;
-            let y = c.y + coord.y;
-            if x < 0 || y < 0 {
-                continue;
-            }
-            let placement = Coordinates::new(x, y);
-            overlapping_self += self_coords
-                .iter()
-                .filter(|&placed| placed.eq(&placement))
-                .count();
-
-            if other_coords
-                .iter()
-                .any(|placed| placed.eq(&placement)) {
-                return false;
-            }
-
-            if overlapping_self > 1 {
-                return false;
-            }
-        }
-        overlapping_self == 1
-    }
 
     fn get_player_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         if self.player == 1 {
@@ -152,6 +203,18 @@ impl State {
         }
     }
 
+    fn in_range_coords(&self, placement: &Coordinates, p: &Piece) -> Vec<Coordinates> {
+        let (p1_coords, p2_coords) = self.get_player_coords();
+            p1_coords
+            .into_iter()
+            .chain(p2_coords.into_iter())
+            .filter(|c| (
+                (placement.x - p.width()..= placement.x +p.width()).contains(&c.x) &&
+                    (placement.y - p.height()..= placement.y + p.height()).contains(&c.y)
+                ))
+            .collect()
+    }
+
     fn get_playable_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>) {
         if self.player == 1 {
             (self.p1.playable.clone(), self.p2.playable.clone())
@@ -159,50 +222,4 @@ impl State {
             (self.p2.playable.clone(), self.p1.playable.clone())
         }
     }
-    fn iterable_coords(&self, coords: &[Coordinates]) -> (isize, isize, isize, isize) {
-        (
-            self.left_coord(coords),
-            self.right_coord(coords),
-            self.top_coord(coords),
-            self.bottom_coord(coords),
-        )
-    }
-    fn top_coord(&self, coords: &[Coordinates]) -> isize {
-        let mut y = self.board.dimensions.1;
-        for c in coords {
-            if c.y < y {
-                y = c.y;
-            }
-        }
-        y
-    }
-    fn bottom_coord(&self, coords: &[Coordinates]) -> isize {
-        let mut y = 0;
-        for c in coords {
-            if c.y > y {
-                y = c.y;
-            }
-        }
-        y
-    }
-    fn left_coord(&self, coords: &[Coordinates]) -> isize {
-        let mut x = self.board.dimensions.0;
-        for c in coords {
-            if c.x < x {
-                x = c.x;
-            }
-        }
-        x
-    }
-    fn right_coord(&self, coords: &[Coordinates]) -> isize {
-        let mut x = 0;
-        for c in coords {
-            if c.x > x {
-                x = c.x;
-            }
-        }
-        x
-    }
-
-
 }

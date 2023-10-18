@@ -45,13 +45,7 @@ impl Piece {
     pub fn height(&self) -> isize {
         self.bottom() - self.top() + 1
     }
-/*
-    pub fn placement_coord(&self, c: &Coordinates) -> Coordinates {
-        let (offset_x, offset_y) = self.offset();
-        Coordinates::new(c.x - offset_x, c.y - offset_y)
-    }
 
- */
     pub fn top(&self) -> isize {
         let mut y = self.dimensions.1;
         for c in self.borders() {
@@ -91,18 +85,8 @@ impl Piece {
         }
         x
     }
-/*
-    pub fn offset(&self) -> (isize, isize) {
-        let mut offset = self.borders().last().unwrap().clone();
-        for coords in self.borders() {
-            if coords.x + coords.y < offset.x + offset.y {
-                offset = coords;
-            }
-        }
-        (offset.x, offset.y)
-    }
- */
+
     pub fn wide(&self) -> bool {
-        self.width() > self.height()
+        self.width() >= self.height()
     }
 }

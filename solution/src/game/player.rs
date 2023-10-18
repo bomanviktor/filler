@@ -29,16 +29,16 @@ impl Player {
     }
 
     pub fn top_y(&self) -> isize {
-        self.coords[0].y
+        self.playable[0].y
     }
 
     pub fn bottom_y(&self) -> isize {
-            self.coords.last().unwrap().y
+            self.playable.last().unwrap().y
     }
 
     pub fn left_x(&self) -> isize {
-        let mut left = 999;
-        for coordinates in &self.coords {
+        let mut left = isize::MAX;
+        for coordinates in &self.playable {
             if coordinates.x < left {
                 left = coordinates.x;
             }
@@ -48,7 +48,7 @@ impl Player {
 
     pub fn right_x(&self) -> isize {
         let mut right = 0;
-        for coordinates in &self.coords {
+        for coordinates in &self.playable {
             if coordinates.x > right {
                 right = coordinates.x;
             }
