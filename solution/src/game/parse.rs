@@ -9,13 +9,17 @@ pub fn instruction() -> String {
 }
 
 pub fn dimensions(s: &str) -> (isize, isize) {
-    let dimensions: Vec<&str> = s.trim_end()
-        .trim_end_matches(":")
+    let dimensions: Vec<&str> = s
+        .trim_end()
+        .trim_end_matches(':')
         .split_ascii_whitespace()
         .skip(1)
         .collect();
 
-    (dimensions[0].parse().unwrap(), dimensions[1].parse().unwrap())
+    (
+        dimensions[0].parse().unwrap(),
+        dimensions[1].parse().unwrap(),
+    )
 }
 
 pub fn player() -> u8 {

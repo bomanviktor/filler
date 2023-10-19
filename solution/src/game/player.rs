@@ -7,21 +7,12 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(
-        coords: Vec<Coordinates>,
-        playable: Vec<Coordinates>,
-    ) -> Self {
-        Self {
-            coords,
-            playable
-        }
+    pub fn new(coords: Vec<Coordinates>, playable: Vec<Coordinates>) -> Self {
+        Self { coords, playable }
     }
 
     pub fn init(board: &Board) -> (Self, Self) {
-        let (p1_coords,
-            p2_coords,
-            playable_1,
-            playable_2) = board.all_coords();
+        let (p1_coords, p2_coords, playable_1, playable_2) = board.all_coords();
         (
             Player::new(p1_coords, playable_1),
             Player::new(p2_coords, playable_2),
@@ -33,7 +24,7 @@ impl Player {
     }
 
     pub fn bottom_y(&self) -> isize {
-            self.coords.last().unwrap().y
+        self.coords.last().unwrap().y
     }
 
     pub fn left_x(&self) -> isize {

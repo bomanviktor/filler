@@ -1,4 +1,4 @@
-use crate::game::{Dimensions, dimensions, instruction};
+use crate::game::{dimensions, instruction, Dimensions};
 
 use super::Coordinates;
 
@@ -18,29 +18,31 @@ impl Board {
 
         for _ in 0..=dimensions.1 as usize {
             let instruction = &instruction();
-            if  instruction.contains(" .")
+            if instruction.contains(" .")
                 || instruction.contains(" @")
                 || instruction.contains(" $")
                 || instruction.contains(" a")
-                || instruction.contains(" s") {
+                || instruction.contains(" s")
+            {
                 board.anfield(instruction);
             }
         }
         board
     }
 
-
-
     pub fn anfield(&mut self, s: &str) {
-        let row = s
-            .split_whitespace()
-            .next_back()
-            .unwrap()
-            .trim_end();
+        let row = s.split_whitespace().next_back().unwrap().trim_end();
         self.anfield.push(row.chars().collect())
     }
 
-    pub fn all_coords(&self) -> (Vec<Coordinates>, Vec<Coordinates>, Vec<Coordinates>, Vec<Coordinates>) {
+    pub fn all_coords(
+        &self,
+    ) -> (
+        Vec<Coordinates>,
+        Vec<Coordinates>,
+        Vec<Coordinates>,
+        Vec<Coordinates>,
+    ) {
         let mut p1_coords = Vec::new();
         let mut p2_coords = Vec::new();
         let mut playable_1 = Vec::new();
@@ -74,7 +76,7 @@ impl Board {
         let rows = if y == 0 {
             self.anfield.iter().skip(0).take(2)
         } else {
-            self.anfield.iter().skip(y-1).take(3)
+            self.anfield.iter().skip(y - 1).take(3)
         };
 
         for row in rows {
@@ -82,10 +84,8 @@ impl Board {
                 if row.iter().take(2).any(|c| c == &'.') {
                     return true;
                 }
-            } else {
-                if row.iter().skip(x-1).take(3).any(|c| c == &'.') {
-                    return true;
-                }
+            } else if row.iter().skip(x - 1).take(3).any(|c| c == &'.') {
+                return true;
             }
         }
         false
@@ -119,5 +119,4 @@ impl Board {
     pub fn height(&self) -> isize {
         self.dimensions.1
     }
-
 }

@@ -25,16 +25,13 @@ impl State {
             }
         }
 
-        if self.place_piece(self_coords, piece) {
-            return;
-        } else {
+        if !self.place_piece(self_coords, piece) {
             println!("0 0");
         }
-
     }
 
     fn place_piece(&mut self, coords: &[Coordinates], piece: &Piece) -> bool {
-        for c in &self.sort_distances(&coords) {
+        for c in &self.sort_distances(coords) {
             if let Some(placement_coords) = self.can_place(c, piece) {
                 let placement = self.shortest_distance(&placement_coords);
                 self.insert(&placement, piece);
@@ -48,22 +45,18 @@ impl State {
     fn sort_distances(&self, self_coords: &[Coordinates]) -> Vec<Coordinates> {
         let other_coords = self.get_playable_coords().1;
         let mut distances: Vec<Distance> = Vec::with_capacity(self_coords.len());
-        for c1 in self_coords.into_iter() {
+        for c1 in self_coords.iter() {
             let mut dist = isize::MAX;
             for c2 in &other_coords {
-                let current_dist = c1.calc_dist(&c2);
+                let current_dist = c1.calc_dist(c2);
                 if current_dist < dist {
                     dist = current_dist;
                 }
             }
             distances.push((dist, c1.clone()));
         }
-        distances
-            .sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-        distances
-            .into_iter()
-            .map(|d| d.1)
-            .collect()
+        distances.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        distances.into_iter().map(|d| d.1).collect()
     }
 
     fn can_place(&self, c: &Coordinates, p: &Piece) -> Option<Vec<Coordinates>> {
@@ -82,9 +75,9 @@ impl State {
                 if self.out_of_bounds(&piece_coordinate)
                     || other_coords.contains(&piece_coordinate)
                     || self_coords.contains(&piece_coordinate)
-                    {
+                {
                     allowed_to_place = false;
-                    break
+                    break;
                 }
             }
             if allowed_to_place {
@@ -101,47 +94,31 @@ impl State {
 
     fn block(&self) -> Option<Vec<Coordinates>> {
         let (self_coords, other_coords) = self.get_playable_coords();
-        let (self_left,
-            self_right,
-            self_top,
-            self_bottom) = self.border_coords(&self_coords);
-        let (other_left,
-            other_right,
-            other_top,
-            other_bottom) = self.border_coords(&other_coords);
+        let (self_left, self_right, self_top, self_bottom) = self.border_coords(&self_coords);
+        let (other_left, other_right, other_top, other_bottom) = self.border_coords(&other_coords);
 
         let (width, height) = self.board.dimensions;
 
         if self_left < other_left
             && self_right > other_right
             && self_top < other_top
-            && self_bottom > other_bottom {
+            && self_bottom > other_bottom
+        {
             return None;
         }
 
-        if self_left == 0
-            && self_right == width - 1
-            && self_top == 0
-            && self_bottom == height - 1 {
+        if self_left == 0 && self_right == width - 1 && self_top == 0 && self_bottom == height - 1 {
             return None;
         }
 
         let mut block_coords = Vec::new();
 
         let collect_x = |x: isize| -> Vec<Coordinates> {
-            self_coords
-                .iter()
-                .filter(|&c| c.x == x)
-                .map(|c| c.clone())
-                .collect()
+            self_coords.iter().filter(|&c| c.x == x).cloned().collect()
         };
 
         let collect_y = |y: isize| -> Vec<Coordinates> {
-            self_coords
-                .iter()
-                .filter(|&c| c.y == y)
-                .map(|c| c.clone())
-                .collect()
+            self_coords.iter().filter(|&c| c.y == y).cloned().collect()
         };
 
         if self_left > other_left {
@@ -172,8 +149,7 @@ impl State {
             }
         }
 
-
-        if block_coords.is_empty(){
+        if block_coords.is_empty() {
             None
         } else {
             Some(block_coords.into_iter().flatten().collect())
@@ -198,7 +174,6 @@ impl State {
                     shortest_distance = distance;
                     closest_coord = piece_coord.clone();
                 }
-
             }
         }
         closest_coord
@@ -214,10 +189,7 @@ impl State {
 
     fn out_of_bounds(&self, coord: &Coordinates) -> bool {
         let (width, height) = self.board.dimensions;
-        coord.x < 0
-            || coord.x >= width
-            || coord.y < 0
-            || coord.y >= height
+        coord.x < 0 || coord.x >= width || coord.y < 0 || coord.y >= height
     }
     pub fn placeable(&self, c: &Coordinates, piece: &Piece) -> bool {
         let mut overlapping_self = 0;
@@ -235,9 +207,7 @@ impl State {
                 .filter(|&placed| placed.eq(&placement))
                 .count();
 
-            if other_coords
-                .iter()
-                .any(|placed| placed.eq(&placement)) {
+            if other_coords.iter().any(|placed| placed.eq(&placement)) {
                 return false;
             }
 
@@ -307,6 +277,4 @@ impl State {
         }
         x
     }
-
-
 }

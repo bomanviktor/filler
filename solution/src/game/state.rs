@@ -1,4 +1,4 @@
-use super::{Board, instruction, Piece};
+use super::{instruction, Board, Piece};
 use crate::game::Player;
 use std::fmt::{Display, Formatter};
 
@@ -10,7 +10,7 @@ pub struct State {
     pub p1: Player,
     pub p2: Player,
     pub player: u8,
-    pub endgame: bool
+    pub endgame: bool,
 }
 
 impl State {
@@ -22,13 +22,13 @@ impl State {
             p1: players.0,
             p2: players.1,
             player,
-            endgame: false
+            endgame: false,
         }
     }
 
     pub fn update(&mut self) {
         for row in self.board.anfield.iter_mut() {
-            if row.contains(&'a') || row.contains(&'s'){
+            if row.contains(&'a') || row.contains(&'s') {
                 for cell in row.iter_mut() {
                     if cell == &mut 'a' {
                         *cell = '@';
@@ -57,7 +57,6 @@ impl State {
                     } else if cell == 's' {
                         self.board.anfield[y][x] = 's';
                     }
-
                 }
             }
         }
@@ -68,23 +67,19 @@ impl State {
 
         let (new_p1_score, new_p2_score) = (self.p1.coords.len(), self.p2.coords.len());
 
-        if !self.endgame {
-            if self.player == 1 && new_p2_score == p2_score {
-                self.endgame = true;
-            } else if self.player == 2 && new_p1_score == p1_score{
-                self.endgame = true;
-            }
+        if !self.endgame
+            && (self.player == 1 && new_p2_score == p2_score
+                || self.player == 2 && new_p1_score == p1_score)
+        {
+            self.endgame = true;
         }
+
         self.score = (new_p1_score as u64, new_p2_score as u64);
         self.round += 1;
     }
 
     pub fn insert(&mut self, c: &Coordinates, piece: &Piece) {
-        let character = if self.player == 1 {
-            'a'
-        } else {
-            's'
-        };
+        let character = if self.player == 1 { 'a' } else { 's' };
 
         for piece_c in piece.borders() {
             let x = (piece_c.x + c.x) as usize;
@@ -125,5 +120,3 @@ impl Coordinates {
         }
     }
 }
-
-
